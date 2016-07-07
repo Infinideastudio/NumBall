@@ -242,7 +242,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 146.7,
+      "width": 183.37,
       "height": 40
     },
     "_children": [],
@@ -253,7 +253,7 @@
     "_position": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": 255
+      "y": 256
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -281,7 +281,7 @@
     },
     "_enabled": true,
     "_useOriginalSize": false,
-    "_fontSize": 40,
+    "_fontSize": 50,
     "_lineHeight": 40,
     "_enableWrapText": true,
     "_N$file": null,
@@ -314,7 +314,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 166.68,
+      "width": 145.84,
       "height": 40
     },
     "_children": [],
@@ -324,8 +324,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 363,
-      "y": 266
+      "x": 326,
+      "y": 256
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -353,14 +353,14 @@
     },
     "_enabled": true,
     "_useOriginalSize": false,
-    "_fontSize": 40,
+    "_fontSize": 35,
     "_lineHeight": 40,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
     "_N$string": "Timer: 3s",
     "_N$horizontalAlign": 1,
-    "_N$verticalAlign": 1,
+    "_N$verticalAlign": 2,
     "_N$overflow": 0
   },
   {
@@ -386,7 +386,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 164.53,
+      "width": 149.81,
       "height": 40
     },
     "_children": [],
@@ -396,8 +396,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": -366,
-      "y": 264
+      "x": -328,
+      "y": 256
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -425,14 +425,14 @@
     },
     "_enabled": true,
     "_useOriginalSize": false,
-    "_fontSize": 40,
+    "_fontSize": 35,
     "_lineHeight": 40,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
-    "_N$string": "score 0/0",
-    "_N$horizontalAlign": 1,
-    "_N$verticalAlign": 1,
+    "_N$string": "Score 0/0",
+    "_N$horizontalAlign": 0,
+    "_N$verticalAlign": 2,
     "_N$overflow": 0
   },
   {
