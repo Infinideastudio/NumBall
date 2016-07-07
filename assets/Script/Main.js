@@ -7,11 +7,13 @@ function posDiff(x1,y1,x2,y2){
 
 var balls = [];
 
-var TimeEachRound=10;
+var TimeEachRound=5;
 
 var timer=0;
 
 var score=0;
+
+var gameover=false;
 
 var formulas=[
     "+n",
@@ -179,12 +181,13 @@ cc.Class({
         for(var i=0;i<Math.round(Math.random()*10);i++)
             balls.push(new Ball(this.node, this.ballsprite));
         
-        formula=formulas[Math.floor(Math.random()*formulas.length)].replace("n", Math.floor(Math.random()*10));
+        formula=formulas[Math.floor(Math.random()*formulas.length)].replace("n", Math.floor(Math.random()*9)+1);
         this.formulaNode.string=formula;
     },
 
     // called every frame
     update: function (dt) {
+        if(gameover) return;
         timer+=dt;
         this.timerNode.string="Timer: "+(TimeEachRound-Math.ceil(timer)).toString();
         var sumnum=0;
@@ -199,12 +202,18 @@ cc.Class({
             for(let i=0;i<balls.length;i++){
                 //apply formula
                 balls[i].setNum(parseInt(eval(balls[i].num.toString()+formula)));
-                if(balls[i].num==0){
+                if(balls[i].num<=0){
                     balls[i].rm();
                     balls=balls.slice(0,i).concat(balls.slice(i+1,balls.length));
                 }
             }
-            formula=formulas[Math.floor(Math.random()*formulas.length)].replace("n", Math.floor(Math.random()*10));
+            if(balls.length==0){
+                gameover=true;
+                this.formulaNode.string="Game over!";
+                this.scoreNode.string="Score: " + score;
+                return;
+            }
+            formula=formulas[Math.floor(Math.random()*formulas.length)].replace("n", Math.floor(Math.random()*9)+1);
             this.formulaNode.string=formula;
         }
     },
