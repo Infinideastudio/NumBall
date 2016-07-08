@@ -6,10 +6,21 @@ function posDiff(x1,y1,x2,y2){
 }
 
 function calcSize(num){
-    return 1.5-50/(num+33);
+    return 1.5-50/(num+35);
+}
+
+function random(min,max){
+    return Math.floor(Math.random() * (max - min) + min);
+}
+function randomfloat(min,max){
+    return Math.random() * (max - min) + min;
 }
 
 var balls = [];
+
+function removeFromBalls(id){
+    balls=balls.slice(0,id).concat(balls.slice(id+1,balls.length));
+}
 
 var TimeEachRound=5;
 
@@ -20,10 +31,10 @@ var score=0;
 var gameover=false;
 
 var formulas=[
-    "+n",
-    "-n",
-    "*n",
-    "/n"
+    "X+d",
+    "X-d",
+    "X*a+d","X*a-d",
+    "X/a","X/a-d"
     ];
 
 var formula = "";
@@ -39,6 +50,14 @@ var Ball = cc.Class({
     labelnode: null,
     pnode: null,psf:null,
     tow:false,toa:false,tod:false,tos:false,
+    getSelfPosInBalls: function(){
+        let id=0;
+        for(id=0;id<balls.length;id++){
+            if(balls[id].x==this.x&&balls[id].y==this.y&&balls[id].num==this.num) break;
+        }
+        return id;
+    },
+    
     ctor: function (node,sf) {
         this.pnode=node;
         this.psf=sf;
@@ -101,17 +120,13 @@ var Ball = cc.Class({
                     balls.push(ball);
                 }
                 this.rm();
-                let id=0;
-                for(id=0;id<balls.length;id++){
-                    if(balls[id].x==this.x&&balls[id].y==this.y) break;
-                }
-                balls=balls.slice(0,id).concat(balls.slice(id+1,balls.length));
+                removeFromBalls(this.getSelfPosInBalls());
             }
         }.bind(this));
         
 
         this.ballnode.on(cc.Node.EventType.TOUCH_END, function ( event ) {
-            //Hit check
+            //碰撞检测，合并
             for(let i=0;i<balls.length;i++){
                 let balli=balls[i];
                 let ballj=this;
@@ -122,31 +137,23 @@ var Ball = cc.Class({
                     ball.setNum(balli.num+ballj.num);
                     balli.rm();
                     ballj.rm();
-                    balls=balls.slice(0,i).concat(balls.slice(i+1,balls.length));
-                    let j=0;
-                    for(;j<balls.length;j++){
-                        if(balls[j].x==this.x&&balls[j].y==this.y) break;
-                    }
-                    balls=balls.slice(0,j).concat(balls.slice(j+1,balls.length));
+                    removeFromBalls(i);
+                    removeFromBalls(this.getSelfPosInBalls());
                     balls.push(ball);
-                    break;
+                    return;
                 }
             }
             
-            //Split
+            //平分
             if(this.num>=2&&timer-this.ortimer<1&&posDiff(this.x,this.y,this.orx,this.ory)<10){
                 let ball1=new Ball(this.pnode, this.psf);
                 let ball2=new Ball(this.pnode, this.psf);
-                ball1.setPos(this.x - 15,this.y);
+                ball1.setPos(this.x - 15, this.y);
                 ball1.setNum(Math.floor(this.num/2));
-                ball2.setPos(this.x + 15,this.y);
-                ball2.setNum(Math.floor(this.num/2));
+                ball2.setPos(this.x + 15, this.y);
+                ball2.setNum(this.num - Math.floor(this.num/2));
                 this.rm();
-                let i=0;
-                for(;i<balls.length;i++){
-                    if(balls[i].x==this.x&&balls[i].y==this.y) break;
-                }
-                balls=balls.slice(0,i).concat(balls.slice(i+1,balls.length));
+                removeFromBalls(this.getSelfPosInBalls());
                 balls.push(ball1);
                 balls.push(ball2);
             }
@@ -193,13 +200,26 @@ cc.Class({
         },
     },
     
+    numsum:0,
+    
+    genFormula: function(){
+        formula=formulas[Math.floor(Math.random()*formulas.length)]
+        .replace("a", random(1,5)).replace("a!", random(2,5)).replace("b", random(1,100)).replace("c", Math.floor(randomfloat(0,0.1)*this.numsum))
+        .replace("d", Math.floor(randomfloat(0.5,0.8)*this.numsum)).replace("e", randomfloat(0,1));
+        this.formulaNode.string=formula;
+    },
+    
     // use this for initialization
     onLoad: function () {
-        for(var i=0;i<Math.round(Math.random()*10);i++)
+        for(var i=0;i<random(3, 10);i++)
             balls.push(new Ball(this.node, this.ballsprite));
         
-        formula=formulas[Math.floor(Math.random()*formulas.length)].replace("n", Math.floor(Math.random()*9)+1);
-        this.formulaNode.string=formula;
+        this.numsum=0;
+        for(let i=0;i<balls.length;i++){
+            this.numsum+=balls[i].num;
+        }
+        this.scoreNode.string="Score: " + this.numsum + "/" + score;
+        this.genFormula()
     },
 
     // called every frame
@@ -207,18 +227,13 @@ cc.Class({
         if(gameover) return;
         timer+=dt;
         this.timerNode.string="Timer: "+(TimeEachRound-Math.ceil(timer)).toString();
-        var sumnum=0;
-        for(let i=0;i<balls.length;i++){
-            sumnum+=balls[i].num;
-        }
-        if(sumnum>score) score=sumnum;
-        this.scoreNode.string="Score: " + sumnum + "/" + score;
         
         if(timer>=TimeEachRound){
             timer=0;
+            
             for(let i=0;i<balls.length;){
-                //apply formula
-                balls[i].setNum(parseInt(eval(balls[i].num.toString()+formula)));
+                //Apply formula
+                balls[i].setNum(parseInt(eval(formula.replace("X", balls[i].num))));
                 if(balls[i].num<=0){
                     balls[i].rm();
                     balls=balls.slice(0,i).concat(balls.slice(i+1,balls.length));
@@ -226,6 +241,14 @@ cc.Class({
                     i++;
                 }
             }
+            
+            this.numsum=0;
+            for(let i=0;i<balls.length;i++){
+                this.numsum+=balls[i].num;
+            }
+            if(this.numsum>score) score=this.numsum;
+            this.scoreNode.string="Score: " + this.numsum + "/" + score;
+            
             if(balls.length==0){
                 gameover=true;
                 this.formulaNode.string="Game over!";
@@ -233,8 +256,7 @@ cc.Class({
                 this.timerNode.string="";
                 return;
             }
-            formula=formulas[Math.floor(Math.random()*formulas.length)].replace("n", Math.floor(Math.random()*9)+2);
-            this.formulaNode.string=formula;
+            this.genFormula();
         }
         var size = cc.winSize;
         for(let i=0;i<balls.length;i++){
