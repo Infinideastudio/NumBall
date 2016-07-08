@@ -222,11 +222,11 @@ cc.Class({
         }
         this.scoreNode.string="Score: " + this.numsum + "/" + score;
         this.genFormula();
-    }
+    },
     
     // use this for initialization
     onLoad: function () {
-        init();
+        this.init();
     },
 
     // called every frame
@@ -234,7 +234,7 @@ cc.Class({
         timer+=dt;
         if(gameover){
             if(timer>3){
-                init();
+                this.init();
                 gameover=false
                 timer=0;
             }else{
