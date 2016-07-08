@@ -22,7 +22,7 @@ function removeFromBalls(id){
     balls=balls.slice(0,id).concat(balls.slice(id+1,balls.length));
 }
 
-var TimeEachRound=5;
+const TimeEachRound=5;
 
 var timer=0;
 
@@ -38,6 +38,7 @@ var formulas=[
     ];
 
 var formula = "";
+
 var Ball = cc.Class({
     name: "Ball",
     num: 0,
@@ -209,23 +210,37 @@ cc.Class({
         this.formulaNode.string=formula;
     },
     
-    // use this for initialization
-    onLoad: function () {
+    init: function(){
         for(var i=0;i<random(3, 10);i++)
             balls.push(new Ball(this.node, this.ballsprite));
         
+        score=0;
+        formula="";
         this.numsum=0;
         for(let i=0;i<balls.length;i++){
             this.numsum+=balls[i].num;
         }
         this.scoreNode.string="Score: " + this.numsum + "/" + score;
-        this.genFormula()
+        this.genFormula();
+    }
+    
+    // use this for initialization
+    onLoad: function () {
+        init();
     },
 
     // called every frame
     update: function (dt) {
-        if(gameover) return;
         timer+=dt;
+        if(gameover){
+            if(timer>3){
+                init();
+                gameover=false
+                timer=0;
+            }else{
+                return;
+            }
+        }
         this.timerNode.string="Timer: "+(TimeEachRound-Math.ceil(timer)).toString();
         
         if(timer>=TimeEachRound){
