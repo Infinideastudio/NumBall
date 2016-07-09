@@ -6,7 +6,7 @@ function posDiff(x1,y1,x2,y2){
 }
 
 function calcSize(num){
-    return 1.5-50/(num+35);
+    return 1-50/(num+60);
 }
 
 function random(min,max){
@@ -34,7 +34,7 @@ var formulas=[
     "X+d",
     "X-d",
     "X*a+d","X*a-d",
-    "X/a","X/a-d"
+    "X/a+d","X/a-d"
     ];
 
 var formula = "";
@@ -42,6 +42,7 @@ var formula = "";
 var Ball = cc.Class({
     name: "Ball",
     num: 0,
+    targetnum: 0,
     x:0,
     y:0,
     orx:0,
@@ -131,11 +132,12 @@ var Ball = cc.Class({
             for(let i=0;i<balls.length;i++){
                 let balli=balls[i];
                 let ballj=this;
-                if(balli.x==ballj.x&&balli.y==ballj.y) continue; 
+                if(balli.x==ballj.x&&balli.y==ballj.y&&balli.num==ballj.num) continue; 
                 if(posDiff(balli.x,balli.y,ballj.x,ballj.y)<20){ 
                     let ball=new Ball(this.pnode, this.psf);
                     ball.setPos(ballj.x,ballj.y);
-                    ball.setNum(balli.num+ballj.num);
+                    ball.targetnum=balli.num+ballj.num;
+                    ball.setNum(ballj.num);
                     balli.rm();
                     ballj.rm();
                     removeFromBalls(i);
@@ -243,15 +245,26 @@ cc.Class({
         }
         this.timerNode.string="Timer: "+(TimeEachRound-Math.ceil(timer)).toString();
         
+        let test=false;
+        for(let i=0;i<balls.length;i++){
+            //Test Apply formula
+            if(parseInt(eval(formula.replace("X", balls[i].num)))>0){
+                test=true;
+                break;
+            }
+        }
+        if(test) this.formulaNode.node.color=new cc.Color(255,255,255);
+        else this.formulaNode.node.color=new cc.Color(255,97,0);
+            
         if(timer>=TimeEachRound){
             timer=0;
             
             for(let i=0;i<balls.length;){
                 //Apply formula
-                balls[i].setNum(parseInt(eval(formula.replace("X", balls[i].num))));
-                if(balls[i].num<=0){
+                balls[i].targetnum=parseInt(eval(formula.replace("X", balls[i].num)));
+                if(balls[i].targetnum<=0){
                     balls[i].rm();
-                    balls=balls.slice(0,i).concat(balls.slice(i+1,balls.length));
+                    removeFromBalls(i);
                 }else{
                     i++;
                 }
@@ -275,6 +288,31 @@ cc.Class({
         }
         var size = cc.winSize;
         for(let i=0;i<balls.length;i++){
+            //球变大变小动画
+            let diff=Math.abs(balls[i].targetnum-balls[i].num);
+            let add=balls[i].targetnum>balls[i].num;
+            if(diff>0){
+                if(diff>5) balls[i].setNum(balls[i].num+(add?1:-1)*Math.floor(diff*0.2));
+                else balls[i].setNum(balls[i].targetnum);
+            }
+            
+            /*
+            for(let j=0;j<balls.length;j++){
+                let x1=balls[i].x;
+                let x2=balls[j].x;
+                let y1=balls[i].y;
+                let y2=balls[j].y;
+                if(x1==x2&&y1==y2&&balls[i].num==balls[j].num) continue; 
+                let d=posDiff(x1,y1,x2,y2);
+                if(d<100){
+                    let x3=(x2-x1)*10/d+x2;
+                    let y3=(y2-y1)*10/d+y2;
+                    balls[i].setPos(x3,y3);
+                }
+            }
+            */
+            
+            //球超出边界检测
             if(balls[i].x>size.width/2) balls[i].setPos(size.width/2,balls[i].y);
             if(balls[i].x<-size.width/2) balls[i].setPos(-size.width/2,balls[i].y);
             if(balls[i].y>size.height/2) balls[i].setPos(balls[i].x,size.height/2);
