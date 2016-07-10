@@ -105,9 +105,6 @@ var Ball = cc.Class({
         this.ballnode.on(cc.Node.EventType.TOUCH_MOVE, function ( event ) {
             var size = cc.winSize;
             this.setPos(event.getLocationX()-size.width/2-this.drx,event.getLocationY()-size.height/2-this.dry);
-        }.bind(this));
-
-        this.ballnode.on(cc.Node.EventType.TOUCH_END, function ( event ) {
             //碰撞检测，合并
             for(let i=0;i<balls.length;i++){
                 let balli=balls[i];
@@ -115,15 +112,9 @@ var Ball = cc.Class({
                 if(balli.x==ballj.x&&balli.y==ballj.y&&balli.num==ballj.num) continue; 
                 let r=ballj.getR();
                 if(powPosDiff(balli.x,balli.y,ballj.x,ballj.y)<r*r){ 
-                    let ball=new Ball(this.pnode, this.psf);
-                    ball.setPos(ballj.x,ballj.y);
-                    ball.targetnum=balli.num+ballj.num;
-                    ball.setNum(ballj.num);
+                    this.targetnum=balli.num+ballj.num;
                     balli.rm();
-                    ballj.rm();
                     removeFromBalls(i);
-                    removeFromBalls(this.getSelfPosInBalls());
-                    balls.push(ball);
                     return;
                 }
             }
@@ -234,10 +225,10 @@ cc.Class({
                 let ball1Num=Math.floor(spballs[i].num/2);
                 let ball2Num=spballs[i].num - Math.floor(spballs[i].num/2);
                 let d=spballs[i].ballnode.width*calcSize(spballs[i].num/2)*2;
-                ball1.setPos(spballs[i].x - 30, spballs[i].y);
+                ball1.setPos(spballs[i].x - spballs[i].getR(), spballs[i].y);
                 ball1.setNum(ball1Num);
                 ball1.targetnum=ball1Num;
-                ball2.setPos(spballs[i].x + 30, spballs[i].y);
+                ball2.setPos(spballs[i].x + spballs[i].getR(), spballs[i].y);
                 ball2.setNum(ball2Num);
                 ball2.targetnum=ball2Num;
                 spballs[i].rm();
